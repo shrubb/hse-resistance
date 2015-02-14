@@ -22,7 +22,7 @@ except Exception as e:
 # extracting node IDs
 temp = sorted(
     tree.getElementsByTagName("net"),
-    key=lambda x: x.getAttribute("id"))
+    key=lambda x: int(x.getAttribute("id")))
 idents = {temp[i].getAttribute("id"): i for i in range(len(temp))}
 del temp
 
