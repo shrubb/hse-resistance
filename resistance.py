@@ -3,8 +3,7 @@ __author__ = 'shrubb'
 import sys
 from time import time
 from xml.dom.minidom import parse
-
-start_time = time()
+import resistancecalc
 
 if len(sys.argv) < 3:
     print(
@@ -74,6 +73,11 @@ for edge in edge_list:
                 1.0,
                 d[edge.fr][edge.to]) + divide(1.0, edge.resistance))
 
+d_cpp = [row.copy() for row in d]
+
+print("Calculating in Python...", end="")
+start_time = time()
+
 for k in range(N):
     for i in range(N):
         for j in range(N):
@@ -81,6 +85,23 @@ for k in range(N):
                 divide(
                     1.0,
                     divide(1.0, d[i][j]) + divide(1.0, d[i][k] + d[k][j]))
+
+py_time = time() - start_time
+print("done")
+
+print("Calculating in C...", end="")
+start_time = time()
+
+resistancecalc.Floyd_Warshall(d_cpp)
+
+c_time = time() - start_time
+print("done")
+print("Pure Python was {} times slower".format(py_time / c_time))
+
+for i in range(N):
+    for j in range(N):
+        if d[i][j] != d_cpp[i][j]:
+            raise Exception("C and Python calculations return different results")
 
 # CSV export
 try:
@@ -90,5 +111,3 @@ except Exception as e:
 
 outfile.writelines(["%.6f," * N % tuple(row) + '\n' for row in d])
 outfile.close()
-
-print("Time of execution: %s seconds" % (time() - start_time))
